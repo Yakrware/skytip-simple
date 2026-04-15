@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run lex && react-router build",
-    "lex": "npx lex build --lexicons ./lexicons/schemas --out ./app/lexicons",
+    "lex": "npx lex build --lexicons ./lexicons/schemas --out ./app/lexicons --clear",
     "cf-typegen": "wrangler types",
     "deploy": "npm run build && wrangler deploy",
     "dev": "react-router dev",

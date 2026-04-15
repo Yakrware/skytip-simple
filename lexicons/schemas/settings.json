@@ -1,0 +1,47 @@
+{
+  "lexicon": 1,
+  "id": "skylark.simple.settings",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Owner's skytip-simple tip/subscription limits, stored on their PDS.",
+      "key": "literal:self",
+      "record": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "minTipAmount": {
+            "type": "integer",
+            "description": "Minimum tip in cents. Defaults to 100 ($1.00) if absent.",
+            "minimum": 100
+          },
+          "maxTipAmount": {
+            "type": "integer",
+            "description": "Maximum tip in cents. No upper cap if absent.",
+            "minimum": 100
+          },
+          "suggestedTipAmount": {
+            "type": "integer",
+            "description": "Pre-selected tip in cents. Falls back to minTipAmount if absent.",
+            "minimum": 100
+          },
+          "minSubscriptionAmount": {
+            "type": "integer",
+            "description": "Minimum monthly subscription in cents. Defaults to 100 ($1.00) if absent.",
+            "minimum": 100
+          },
+          "maxSubscriptionAmount": {
+            "type": "integer",
+            "description": "Maximum monthly subscription in cents. No upper cap if absent.",
+            "minimum": 100
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code. Defaults to USD if absent.",
+            "maxLength": 3
+          }
+        }
+      }
+    }
+  }
+}
