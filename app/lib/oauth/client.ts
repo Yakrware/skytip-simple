@@ -13,7 +13,7 @@ patchGlobalRequestObject();
 
 export const OAUTH_SCOPE_OWNER =
   "atproto include:com.atiproto.authEnhanced";
-export const OAUTH_SCOPE_VISITOR = "atproto";
+export const OAUTH_SCOPE_VISITOR = "atproto include:com.atiproto.authGeneral";
 
 export function buildClientMetadata(origin: string, ownerHandle: string) {
   return {
@@ -22,7 +22,7 @@ export function buildClientMetadata(origin: string, ownerHandle: string) {
     redirect_uris: [`${origin}/oauth/atproto/callback`],
     grant_types: ["authorization_code", "refresh_token"],
     response_types: ["code"],
-    scope: OAUTH_SCOPE_OWNER,
+    scope: OAUTH_SCOPE_VISITOR,
     token_endpoint_auth_method: "none",
     dpop_bound_access_tokens: true,
     application_type: "web",
