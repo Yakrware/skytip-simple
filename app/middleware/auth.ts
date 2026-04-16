@@ -1,4 +1,4 @@
-import { createContext } from "react-router";
+import { createContext, redirect } from "react-router";
 import { getOptionalSession } from "~/lib/auth.server";
 import { cloudflareContext } from "./cloudflare";
 
@@ -6,9 +6,9 @@ export interface AuthInfo {
   did: string;
 }
 
-export const authContext = createContext<AuthInfo | null>();
+export const authContext = createContext<AuthInfo>();
 
-export async function optionalAuth({
+export async function requireAuth({
   request,
   context,
 }: {
@@ -17,5 +17,8 @@ export async function optionalAuth({
 }) {
   const { env } = context.get(cloudflareContext);
   const session = await getOptionalSession(request, env.OAUTH_KV);
-  context.set(authContext, session ? { did: session.did } : null);
+  if (!session) {
+    throw redirect("/oauth/atproto/login");
+  }
+  context.set(authContext, { did: session.did });
 }

@@ -14,7 +14,7 @@ export function parseCookie(header: string): Record<string, string> {
   );
 }
 
-export function setSessionCookie(did: string): string {
+export function sessionCookieHeader(did: string): string {
   return `${COOKIE_NAME}=${encodeURIComponent(did)}; HttpOnly; SameSite=Lax; Secure; Max-Age=${MAX_AGE}; Path=/`;
 }
 

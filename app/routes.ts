@@ -10,7 +10,7 @@ export default [
   route("oauth/atproto/login", "routes/oauth/atproto/login.tsx"),
   route("oauth/atproto/logout", "routes/oauth/atproto/logout.tsx"),
 
-  // App routes — inside layout (optionalAuth + optionalAgent middleware)
+  // App routes — inside layout (requireAuth + requireAgent middleware)
   layout("routes/_layout.tsx", [
     // Step 3 adds _index.tsx and owner.tsx here
   ]),

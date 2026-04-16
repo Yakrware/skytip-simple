@@ -2,8 +2,12 @@ import { redirect } from "react-router";
 import { OAuthCallbackError } from "@atproto/oauth-client";
 import type { Route } from "./+types/callback";
 import { cloudflareContext } from "~/middleware/cloudflare";
-import { createOAuthClient, OAUTH_SCOPE } from "~/lib/oauth/client";
-import { setSessionCookie } from "~/lib/session";
+import {
+  createOAuthClient,
+  OAUTH_SCOPE_OWNER,
+  OAUTH_SCOPE_VISITOR,
+} from "~/lib/oauth/client";
+import { sessionCookieHeader } from "~/lib/session";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -11,13 +15,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
   const { env } = context.get(cloudflareContext);
   const origin = url.origin;
-  const client = createOAuthClient(origin, env.OAUTH_KV);
+  const ownerHandle = env.OWNER_HANDLE;
+  const client = createOAuthClient(origin, env.OAUTH_KV, ownerHandle);
 
   try {
     const { session: oauthSession } = await client.callback(params);
 
     throw redirect("/", {
-      headers: { "Set-Cookie": setSessionCookie(oauthSession.did) },
+      headers: { "Set-Cookie": sessionCookieHeader(oauthSession.did) },
     });
   } catch (err) {
     if (err instanceof Response) throw err;
@@ -31,8 +36,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     ) {
       const { handle } = parseState(err.state);
       if (handle) {
+        const scope =
+          handle === ownerHandle
+            ? OAUTH_SCOPE_OWNER
+            : OAUTH_SCOPE_VISITOR;
         const authorizeUrl = await client.authorize(handle, {
-          scope: OAUTH_SCOPE,
+          scope,
           state: JSON.stringify({ handle }),
         });
         throw redirect(authorizeUrl.toString());

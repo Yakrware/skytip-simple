@@ -1,7 +1,11 @@
 import { redirect, data } from "react-router";
 import type { Route } from "./+types/login";
 import { cloudflareContext } from "~/middleware/cloudflare";
-import { createOAuthClient, OAUTH_SCOPE } from "~/lib/oauth/client";
+import {
+  createOAuthClient,
+  OAUTH_SCOPE_OWNER,
+  OAUTH_SCOPE_VISITOR,
+} from "~/lib/oauth/client";
 
 export async function action({ request, context }: Route.ActionArgs) {
   const formData = await request.formData();
@@ -13,11 +17,13 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   const { env } = context.get(cloudflareContext);
   const origin = new URL(request.url).origin;
-  const client = createOAuthClient(origin, env.OAUTH_KV);
+  const client = createOAuthClient(origin, env.OAUTH_KV, env.OWNER_HANDLE);
+  const scope =
+    handle === env.OWNER_HANDLE ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
 
   try {
     const authorizeUrl = await client.authorize(handle, {
-      scope: OAUTH_SCOPE,
+      scope,
       prompt: "none",
       state: JSON.stringify({ handle }),
     });

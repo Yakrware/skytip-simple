@@ -5,9 +5,9 @@ import { clearSessionCookieHeader } from "~/lib/session";
 import { cloudflareContext } from "./cloudflare";
 import { authContext } from "./auth";
 
-export const agentContext = createContext<Agent | null>();
+export const agentContext = createContext<Agent>();
 
-export async function optionalAgent({
+export async function requireAgent({
   request,
   context,
 }: {
@@ -15,18 +15,14 @@ export async function optionalAgent({
   context: any;
 }) {
   const auth = context.get(authContext);
-  if (!auth) {
-    context.set(agentContext, null);
-    return;
-  }
   const { env } = context.get(cloudflareContext);
   const origin = new URL(request.url).origin;
   try {
-    const oauthClient = createOAuthClient(origin, env.OAUTH_KV);
+    const oauthClient = createOAuthClient(origin, env.OAUTH_KV, env.OWNER_HANDLE);
     const oauthSession = await oauthClient.restore(auth.did);
     context.set(agentContext, new Agent(oauthSession));
   } catch {
-    throw redirect("/", {
+    throw redirect("/oauth/atproto/login", {
       headers: { "Set-Cookie": clearSessionCookieHeader() },
     });
   }
