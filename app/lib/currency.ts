@@ -1,16 +1,6 @@
-export function dollarsToCents(value: FormDataEntryValue | null): number {
-  const n = parseFloat(String(value ?? "0"));
-  if (Number.isNaN(n)) return 0;
-  return Math.round(n * 100);
-}
-
-export function optionalDollarsToCents(
-  value: FormDataEntryValue | null,
-): number | undefined {
-  if (value == null || String(value).trim() === "") return undefined;
-  return dollarsToCents(value);
-}
-
+// Client-safe currency helpers. Server-only variants (dollarsToCents,
+// optionalDollarsToCents) live in owner.server.ts so they stay out of
+// client bundles.
 export function centsToDollars(cents: number): string {
   return (cents / 100).toFixed(2);
 }

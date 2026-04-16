@@ -1,7 +1,7 @@
 import { redirect, data } from "react-router";
 import type { Agent } from "@atiproto/agent";
-import { dollarsToCents, centsToDollars } from "./currency";
-import type { Main as SkylarkSettings } from "~/lexicons/skylark/simple/settings.defs";
+import { dollarsToCents, centsToDollars } from "./owner.server";
+import type { Main as SkytipSettings } from "~/lexicons/skytip/simple/settings";
 
 export async function createTip({
   form,
@@ -13,7 +13,7 @@ export async function createTip({
   form: FormData;
   agent: Agent;
   ownerDid: string;
-  settings: SkylarkSettings;
+  settings: SkytipSettings;
   origin: string;
 }) {
   const amountCents = dollarsToCents(form.get("amount"));
@@ -52,7 +52,7 @@ export async function createSubscription({
   form: FormData;
   agent: Agent;
   ownerDid: string;
-  settings: SkylarkSettings;
+  settings: SkytipSettings;
 }) {
   const amountCents = dollarsToCents(form.get("amount"));
   const interval = (form.get("interval") as string) || "monthly";

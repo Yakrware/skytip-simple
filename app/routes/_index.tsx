@@ -49,7 +49,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   // Authenticated reads
   const [atiprotoProfile, subscriptions] = await Promise.all([
     agent.com.atiproto.repo.profile.get({ did: ownerDid }),
-    agent.com.atiproto.repo.subscription.search({ subject: ownerDid }),
+    agent.com.atiproto.feed.subscription.list({}),
   ]);
 
   const acceptsTips = atiprotoProfile.data.profile.acceptsTips ?? true;
@@ -57,7 +57,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     atiprotoProfile.data.profile.acceptsSubscriptions ?? true;
 
   const activeSub = subscriptions.data.subscriptions.find(
-    (s) => s.record.status === "active",
+    (s) => s.record.subject === ownerDid && s.record.status === "active",
   );
   const activeSubscription = activeSub
     ? {
