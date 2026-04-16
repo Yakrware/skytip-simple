@@ -48,15 +48,35 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 export async function action({ request, context }: Route.ActionArgs) {
   const formData = await request.formData();
+  const intent = formData.get("intent") as string | null;
   const handle = (formData.get("handle") as string | null)?.trim();
-
-  if (!handle) {
-    return data({ error: "Please enter your handle." }, { status: 400 });
-  }
 
   const { env } = context.get(cloudflareContext);
   const origin = new URL(request.url).origin;
   const client = createOAuthClient(origin, env.OAUTH_KV, env.OWNER_HANDLE);
+
+  // "Create account" flow — no handle needed, user registers at their PDS
+  if (intent === "create") {
+    try {
+      const authorizeUrl = await client.authorize("", {
+        scope: OAUTH_SCOPE_VISITOR,
+        prompt: "create",
+        state: JSON.stringify({}),
+      });
+      throw redirect(authorizeUrl.toString());
+    } catch (e) {
+      if (e instanceof Response) throw e;
+      const message =
+        e instanceof Error ? e.message : "Could not start account creation.";
+      return data({ error: message }, { status: 400 });
+    }
+  }
+
+  // "Sign in" flow — handle required
+  if (!handle) {
+    return data({ error: "Please enter your handle." }, { status: 400 });
+  }
+
   const scope =
     handle === env.OWNER_HANDLE ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
 
