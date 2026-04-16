@@ -12,7 +12,7 @@ export function Header({
         skytip
       </Link>
 
-      {session ? (
+      {session && (
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Avatar src={session.avatar} name={session.handle} size="sm" />
@@ -27,13 +27,6 @@ export function Header({
             </button>
           </Form>
         </div>
-      ) : (
-        <Link
-          to="/"
-          className="text-sm font-medium text-brand no-underline hover:text-brand-hover"
-        >
-          Sign in
-        </Link>
       )}
     </header>
   );
