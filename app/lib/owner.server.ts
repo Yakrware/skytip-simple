@@ -3,7 +3,7 @@ import {
   EdgeDidResolver,
 } from "@atiproto/edge-resolvers";
 import { Agent } from "@atproto/api";
-import type { Main as SkylarkSettings } from "~/lexicons/skylark/simple/settings";
+import type { Main as SkytipSettings } from "~/lexicons/skytip/simple/settings";
 
 const handleResolver = new EdgeXrpcHandleResolver();
 const didResolver = new EdgeDidResolver();
@@ -28,25 +28,25 @@ export async function resolveOwnerPds(did: string): Promise<string> {
 export async function loadOwnerSettings(
   did: string,
   pdsUrl: string,
-): Promise<Partial<SkylarkSettings> | null> {
+): Promise<Partial<SkytipSettings> | null> {
   const agent = new Agent(pdsUrl);
   try {
     const { data } = await agent.com.atproto.repo.getRecord({
       repo: did,
-      collection: "skylark.simple.settings",
+      collection: "skytip.simple.settings",
       rkey: "self",
     });
-    return data.value as Partial<SkylarkSettings>;
+    return data.value as Partial<SkytipSettings>;
   } catch {
     return null;
   }
 }
 
 export function applyDefaults(
-  settings: Partial<SkylarkSettings>,
-): SkylarkSettings {
+  settings: Partial<SkytipSettings>,
+): SkytipSettings {
   return {
-    $type: "skylark.simple.settings",
+    $type: "skytip.simple.settings",
     minTipAmount: 100,
     minSubscriptionAmount: 100,
     currency: "USD",

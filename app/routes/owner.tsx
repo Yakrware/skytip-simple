@@ -32,6 +32,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   ]);
 
   const url = new URL(request.url);
+  const connectUrl = new URL("https://atiproto.com/connect");
+  connectUrl.searchParams.set("redirect_url", `${url.origin}/owner`);
   return {
     settings: applyDefaults(settings ?? {}),
     acceptsTips: atiprotoProfile.data.profile.acceptsTips ?? true,
@@ -39,6 +41,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       atiprotoProfile.data.profile.acceptsSubscriptions ?? true,
     readyForPayment: atiprotoProfile.data.readyForPayment,
     saved: url.searchParams.get("saved") === "true",
+    connectUrl: connectUrl.toString(),
   };
 }
 
@@ -57,7 +60,7 @@ export async function action({ request, context }: Route.ActionArgs) {
   await Promise.all([
     agent.com.atproto.repo.putRecord({
       repo: ownerDid,
-      collection: "skylark.simple.settings",
+      collection: "skytip.simple.settings",
       rkey: "self",
       record: {
         minTipAmount: dollarsToCents(form.get("minTipAmount")),
@@ -113,6 +116,7 @@ export default function OwnerSettings({ loaderData }: Route.ComponentProps) {
     acceptsSubscriptions,
     readyForPayment,
     saved,
+    connectUrl,
   } = loaderData;
   const navigation = useNavigation();
   const isSaving = navigation.state === "submitting";
@@ -127,12 +131,7 @@ export default function OwnerSettings({ loaderData }: Route.ComponentProps) {
           className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200"
         >
           Your account is not ready to receive payments.{" "}
-          <a
-            href="https://atiproto.com/connect"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium underline"
-          >
+          <a href={connectUrl} className="font-medium underline">
             Connect your account
           </a>{" "}
           to get started.
@@ -154,9 +153,7 @@ export default function OwnerSettings({ loaderData }: Route.ComponentProps) {
       <Form method="post">
         <Card className="space-y-6">
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-text">
-              Accept payments
-            </h2>
+            <h2 className="text-lg font-semibold text-text">Accept payments</h2>
             <Toggle
               name="acceptsTips"
               label="Accept tips"
