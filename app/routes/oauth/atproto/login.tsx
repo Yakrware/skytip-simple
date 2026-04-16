@@ -1,6 +1,4 @@
 import { redirect, data, useLoaderData } from "react-router";
-import { Agent } from "@atproto/api";
-import { EdgeXrpcHandleResolver } from "@atiproto/edge-resolvers";
 import type { Route } from "./+types/login";
 import { cloudflareContext } from "~/middleware/cloudflare";
 import {
@@ -8,6 +6,7 @@ import {
   OAUTH_SCOPE_OWNER,
   OAUTH_SCOPE_VISITOR,
 } from "~/lib/oauth/client";
+import { resolveOwner, fetchOwnerBskyProfile } from "~/lib/owner.server";
 import { Avatar } from "~/components/Avatar";
 import { ErrorBanner } from "~/components/ErrorBanner";
 import { LoginForm } from "~/components/LoginForm";
@@ -19,28 +18,22 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const { env } = context.get(cloudflareContext);
   const ownerHandle = env.OWNER_HANDLE;
 
-  const publicApi = "https://public.api.bsky.app";
-  const handleResolver = new EdgeXrpcHandleResolver(publicApi);
-  const ownerDid = await handleResolver.resolve(ownerHandle);
-
   let ownerProfile: {
     displayName: string;
     handle: string;
     avatar?: string;
   } = { displayName: ownerHandle, handle: ownerHandle };
 
-  if (ownerDid) {
-    try {
-      const agent = new Agent(publicApi);
-      const { data: profile } = await agent.getProfile({ actor: ownerDid });
-      ownerProfile = {
-        displayName: profile.displayName || profile.handle,
-        handle: profile.handle,
-        avatar: profile.avatar,
-      };
-    } catch {
-      // Fall back to handle-only profile
-    }
+  try {
+    const ownerDid = await resolveOwner(env);
+    const profile = await fetchOwnerBskyProfile(ownerDid);
+    ownerProfile = {
+      displayName: profile.displayName,
+      handle: profile.handle,
+      avatar: profile.avatar,
+    };
+  } catch {
+    // Fall back to handle-only profile
   }
 
   return { ownerProfile, error };
