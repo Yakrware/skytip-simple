@@ -12,6 +12,6 @@ export default [
 
   // App routes — inside layout (requireAuth + requireAgent middleware)
   layout("routes/_layout.tsx", [
-    // Step 3 adds _index.tsx and owner.tsx here
+    route("owner", "routes/owner.tsx"),
   ]),
 ] satisfies RouteConfig;
