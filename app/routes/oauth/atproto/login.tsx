@@ -113,8 +113,7 @@ export default function LoginPage() {
           Send {ownerProfile.displayName} a tip or subscribe
         </h1>
         <p className="mt-2 text-sm text-text-muted">
-          Sign in with your Bluesky account to continue. Your tips are linked to
-          your Bluesky identity so {ownerProfile.displayName} knows who you are.
+          Sign in with your Bluesky account to continue.
         </p>
       </div>
 
