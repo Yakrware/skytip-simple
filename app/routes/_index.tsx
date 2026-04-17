@@ -61,14 +61,15 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     interval: string;
   } | null = null;
   try {
-    const { data: sub } = await agent.com.atiproto.feed.subscription.get({
+    const { data } = await agent.com.atiproto.feed.subscription.get({
       subject: ownerDid,
     });
-    if (sub.record.status === "active") {
+    const sub = data.subscription;
+    if (sub.status === "active") {
       activeSubscription = {
         uri: sub.uri,
-        amount: sub.record.amount,
-        interval: sub.record.interval,
+        amount: sub.amount,
+        interval: sub.interval,
       };
     }
   } catch {
