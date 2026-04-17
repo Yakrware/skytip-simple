@@ -47,25 +47,33 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const settings = applyDefaults(rawSettings ?? {});
 
   // Authenticated reads
-  const [atiprotoProfile, subscriptions] = await Promise.all([
-    agent.com.atiproto.repo.profile.get({ did: ownerDid }),
-    agent.com.atiproto.feed.subscription.list({}),
-  ]);
+  const atiprotoProfile = await agent.com.atiproto.repo.profile.get({
+    did: ownerDid,
+  });
 
   const acceptsTips = atiprotoProfile.data.profile.acceptsTips ?? true;
   const acceptsSubscriptions =
     atiprotoProfile.data.profile.acceptsSubscriptions ?? true;
 
-  const activeSub = subscriptions.data.subscriptions.find(
-    (s) => s.record.subject === ownerDid && s.record.status === "active",
-  );
-  const activeSubscription = activeSub
-    ? {
-        uri: activeSub.uri,
-        amount: activeSub.record.amount,
-        interval: activeSub.record.interval,
-      }
-    : null;
+  let activeSubscription: {
+    uri: string;
+    amount: number;
+    interval: string;
+  } | null = null;
+  try {
+    const { data: sub } = await agent.com.atiproto.feed.subscription.get({
+      subject: ownerDid,
+    } as any);
+    if (sub.record.status === "active") {
+      activeSubscription = {
+        uri: sub.uri,
+        amount: sub.record.amount,
+        interval: sub.record.interval,
+      };
+    }
+  } catch {
+    // No subscription to this creator
+  }
 
   const url = new URL(request.url);
   return {
