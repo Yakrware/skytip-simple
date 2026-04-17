@@ -55,23 +55,13 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const acceptsSubscriptions =
     atiprotoProfile.data.profile.acceptsSubscriptions ?? true;
 
-  let activeSubscription: {
-    uri: string;
-    amount: number;
-    interval: string;
-  } | null = null;
+  let activeSubscription = null;
   try {
     const { data } = await agent.com.atiproto.feed.subscription.get({
       subject: ownerDid,
     });
-    const sub = data.subscription;
-    if (sub.status === "active") {
-      activeSubscription = {
-        uri: sub.uri,
-        amount: sub.amount,
-        interval: sub.interval,
-      };
-    }
+    if (data.subscription.status === "active")
+      activeSubscription = data.subscription;
   } catch {
     // No subscription to this creator
   }
