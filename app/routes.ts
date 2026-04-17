@@ -1,4 +1,4 @@
-import { type RouteConfig, layout, route } from "@react-router/dev/routes";
+import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
 
 export default [
   // OAuth routes — outside layout (no auth/agent middleware needed)
@@ -12,6 +12,7 @@ export default [
 
   // App routes — inside layout (requireAuth + requireAgent middleware)
   layout("routes/_layout.tsx", [
+    index("routes/_index.tsx"),
     route("owner", "routes/owner.tsx"),
   ]),
 ] satisfies RouteConfig;
