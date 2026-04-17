@@ -63,7 +63,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   try {
     const { data: sub } = await agent.com.atiproto.feed.subscription.get({
       subject: ownerDid,
-    } as any);
+    });
     if (sub.record.status === "active") {
       activeSubscription = {
         uri: sub.uri,
