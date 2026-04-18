@@ -8,11 +8,13 @@ export function TipPanel({
   minTipAmount,
   maxTipAmount,
   suggestedTipAmount,
+  alwaysPrivate,
   busy,
 }: {
   minTipAmount?: number;
   maxTipAmount?: number;
   suggestedTipAmount?: number;
+  alwaysPrivate?: boolean;
   busy: boolean;
 }) {
   const defaultTipAmount = suggestedTipAmount ?? minTipAmount ?? 100;
@@ -72,6 +74,26 @@ export function TipPanel({
             className="w-full rounded-lg border border-border bg-surface-subtle p-2 text-sm text-text placeholder:text-text-muted focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none"
           />
         </div>
+
+        {alwaysPrivate ? (
+          <input type="hidden" name="isPrivate" value="true" />
+        ) : (
+          <label className="flex items-start gap-2 text-sm text-text">
+            <input
+              type="checkbox"
+              name="isPrivate"
+              value="true"
+              className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand"
+            />
+            <span>
+              Send privately
+              <span className="block text-xs text-text-muted">
+                Hide the recipient from my public record. Increases privacy,
+                reduces transferability.
+              </span>
+            </span>
+          </label>
+        )}
 
         <Button type="submit" disabled={busy} loading={busy}>
           Send tip

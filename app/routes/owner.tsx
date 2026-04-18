@@ -75,6 +75,7 @@ export async function action({ request, context }: Route.ActionArgs) {
           form.get("maxSubscriptionAmount"),
         ),
         currency: "USD",
+        alwaysPrivate: form.get("alwaysPrivate") === "true",
       },
     }),
     agent.com.atiproto.account.profile.put({
@@ -198,6 +199,15 @@ export default function OwnerSettings({ loaderData }: Route.ComponentProps) {
               name="maxSubscriptionAmount"
               label="Maximum monthly subscription (optional)"
               defaultValue={settings.maxSubscriptionAmount}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold text-text">Privacy</h2>
+            <Toggle
+              name="alwaysPrivate"
+              label="Always make tips and subscriptions private. This hides the recipient of a tip/subscription from a user's public record."
+              defaultChecked={!!settings.alwaysPrivate}
             />
           </div>
 

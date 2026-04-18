@@ -5,15 +5,17 @@ import {
 import { Agent } from "@atproto/api";
 import type { Main as SkytipSettings } from "~/lexicons/skytip/simple/settings";
 
+export type DidString = `did:${string}:${string}`;
+
 const handleResolver = new EdgeXrpcHandleResolver();
 const didResolver = new EdgeDidResolver();
 
-export async function resolveOwner(env: Env): Promise<string> {
+export async function resolveOwner(env: Env): Promise<DidString> {
   const raw = env.OWNER_HANDLE.trim();
-  if (raw.startsWith("did:")) return raw;
+  if (raw.startsWith("did:")) return raw as DidString;
   const did = await handleResolver.resolve(raw);
   if (!did) throw new Error(`Could not resolve OWNER_HANDLE: ${raw}`);
-  return did;
+  return did as DidString;
 }
 
 export async function resolveOwnerPds(did: string): Promise<string> {
@@ -60,7 +62,7 @@ export async function fetchOwnerBskyProfile(ownerDid: string) {
     actor: ownerDid,
   });
   return {
-    displayName: data.displayName,
+    displayName: data.displayName ?? data.handle,
     handle: data.handle,
     avatar: data.avatar,
     description: data.description,

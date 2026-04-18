@@ -7,10 +7,12 @@ import { Card } from "./Card";
 export function SubscribePanel({
   minSubscriptionAmount,
   maxSubscriptionAmount,
+  alwaysPrivate,
   busy,
 }: {
   minSubscriptionAmount?: number;
   maxSubscriptionAmount?: number;
+  alwaysPrivate?: boolean;
   busy: boolean;
 }) {
   const defaultAmount = minSubscriptionAmount ?? 100;
@@ -27,6 +29,26 @@ export function SubscribePanel({
           max={maxSubscriptionAmount}
           defaultValue={defaultAmount}
         />
+
+        {alwaysPrivate ? (
+          <input type="hidden" name="isPrivate" value="true" />
+        ) : (
+          <label className="flex items-start gap-2 text-sm text-text">
+            <input
+              type="checkbox"
+              name="isPrivate"
+              value="true"
+              className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand"
+            />
+            <span>
+              Subscribe privately
+              <span className="block text-xs text-text-muted">
+                Hide the recipient from my public record. Increases privacy,
+                reduces transferability.
+              </span>
+            </span>
+          </label>
+        )}
 
         <Button type="submit" disabled={busy} loading={busy}>
           Subscribe ${centsToDollars(defaultAmount)}/mo
