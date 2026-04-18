@@ -188,6 +188,7 @@ export default function VisitorPage() {
           minTipAmount={settings.minTipAmount}
           maxTipAmount={settings.maxTipAmount}
           suggestedTipAmount={settings.suggestedTipAmount}
+          alwaysPrivate={settings.alwaysPrivate}
           busy={busy}
         />
       )}
@@ -203,6 +204,7 @@ export default function VisitorPage() {
           <SubscribePanel
             minSubscriptionAmount={settings.minSubscriptionAmount}
             maxSubscriptionAmount={settings.maxSubscriptionAmount}
+            alwaysPrivate={settings.alwaysPrivate}
             busy={busy}
           />
         ))}

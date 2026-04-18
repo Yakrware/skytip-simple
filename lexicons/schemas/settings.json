@@ -39,6 +39,10 @@
             "type": "string",
             "description": "ISO 4217 currency code. Defaults to USD if absent.",
             "maxLength": 3
+          },
+          "alwaysPrivate": {
+            "type": "boolean",
+            "description": "If true, all tips and subscriptions are forced private; the visitor-facing checkbox is hidden."
           }
         }
       }

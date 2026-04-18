@@ -1,7 +1,12 @@
 import { redirect, data } from "react-router";
 import type { Agent } from "@atiproto/agent";
-import { dollarsToCents, centsToDollars } from "./owner.server";
+import { dollarsToCents, centsToDollars, type DidString } from "./owner.server";
 import type { Main as SkytipSettings } from "~/lexicons/skytip/simple/settings";
+
+type UriString = `${string}:${string}`;
+type CancelInput = Parameters<
+  Agent["com"]["atiproto"]["feed"]["subscription"]["cancel"]
+>[0];
 
 export async function createTip({
   form,
@@ -12,7 +17,7 @@ export async function createTip({
 }: {
   form: FormData;
   agent: Agent;
-  ownerDid: string;
+  ownerDid: DidString;
   settings: SkytipSettings;
   origin: string;
 }) {
@@ -32,12 +37,14 @@ export async function createTip({
     );
   }
 
+  const isPrivate = form.get("isPrivate") === "true";
   const { data: tipData } = await agent.com.atiproto.feed.tip.create({
     subject: ownerDid,
     amount: amountCents,
     currency: settings.currency ?? "USD",
     message: (form.get("message") as string) || undefined,
-    redirectUrl: origin + "/?success=true",
+    redirectUrl: (origin + "/?success=true") as UriString,
+    ...(isPrivate && { isPrivate: true }),
   });
   if (tipData.checkoutUrl) return redirect(tipData.checkoutUrl);
   return redirect("/?success=true");
@@ -51,7 +58,7 @@ export async function createSubscription({
 }: {
   form: FormData;
   agent: Agent;
-  ownerDid: string;
+  ownerDid: DidString;
   settings: SkytipSettings;
 }) {
   const amountCents = dollarsToCents(form.get("amount"));
@@ -76,11 +83,13 @@ export async function createSubscription({
     );
   }
 
+  const isPrivate = form.get("isPrivate") === "true";
   const { data: subData } = await agent.com.atiproto.feed.subscription.create({
     subject: ownerDid,
     amount: amountCents,
     currency: settings.currency ?? "USD",
     interval: interval as "monthly" | "yearly",
+    ...(isPrivate && { isPrivate: true }),
   });
   if (subData.checkoutUrl) return redirect(subData.checkoutUrl);
   return redirect("/?success=true");
@@ -93,7 +102,9 @@ export async function cancelSubscription({
   form: FormData;
   agent: Agent;
 }) {
-  const subscriptionUri = form.get("subscriptionUri") as string;
+  const subscriptionUri = form.get(
+    "subscriptionUri",
+  ) as CancelInput["subscriptionUri"];
   const { data: cancelData } =
     await agent.com.atiproto.feed.subscription.cancel({ subscriptionUri });
   return redirect(
