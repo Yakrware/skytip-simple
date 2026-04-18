@@ -37,14 +37,13 @@ export async function createTip({
     );
   }
 
-  const isPrivate = form.get("isPrivate") === "true";
   const { data: tipData } = await agent.com.atiproto.feed.tip.create({
     subject: ownerDid,
     amount: amountCents,
     currency: settings.currency ?? "USD",
     message: (form.get("message") as string) || undefined,
     redirectUrl: (origin + "/?success=true") as UriString,
-    ...(isPrivate && { isPrivate: true }),
+    isPrivate: form.get("isPrivate") === "true",
   });
   if (tipData.checkoutUrl) return redirect(tipData.checkoutUrl);
   return redirect("/?success=true");
@@ -83,13 +82,12 @@ export async function createSubscription({
     );
   }
 
-  const isPrivate = form.get("isPrivate") === "true";
   const { data: subData } = await agent.com.atiproto.feed.subscription.create({
     subject: ownerDid,
     amount: amountCents,
     currency: settings.currency ?? "USD",
     interval: interval as "monthly" | "yearly",
-    ...(isPrivate && { isPrivate: true }),
+    isPrivate: form.get("isPrivate") === "true",
   });
   if (subData.checkoutUrl) return redirect(subData.checkoutUrl);
   return redirect("/?success=true");
