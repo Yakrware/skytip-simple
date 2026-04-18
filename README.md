@@ -1,8 +1,8 @@
 # skytip-simple
 
-A one-page Bluesky tip & subscription page you can deploy to your own Cloudflare account in one click.
+An extra-simple one-page Bluesky tip & subscription page you can deploy to your own Cloudflare account in one click.
 
-Built with [AT Protocol](https://atproto.com) and [atiproto](https://atiproto.com).
+Built with [AT Protocol](https://atproto.com) and [aTIProto](https://atiproto.com).
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Yakrware/skytip-simple)
 
@@ -10,13 +10,13 @@ Built with [AT Protocol](https://atproto.com) and [atiproto](https://atiproto.co
 
 - Visitors log in with Bluesky and send you a one-time tip or recurring subscription
 - You control min/max amounts from your settings page
-- Payments handled via atiproto + Stripe
+- Payments handled via aTIProto + Stripe
 
 ## Prerequisites
 
 - A Cloudflare account (free tier works)
 - A Bluesky account
-- An atiproto account at [atiproto.com](https://atiproto.com) to receive payments
+- Connect your stripe account via [aTIProto.com](https://atiproto.com) to receive payments
 
 ## Configuration
 
@@ -27,6 +27,8 @@ After deploying, set this in your Cloudflare Worker dashboard:
 | `OWNER_HANDLE` | Variable | Your Bluesky handle, e.g. `alice.bsky.social` |
 
 Create a KV namespace and bind it as `OAUTH_KV`.
+
+Log in to your skytip deploy and follow the instructions to connect to stripe.
 
 ## Local Development
 
