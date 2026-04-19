@@ -19,11 +19,13 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const origin = url.origin;
   const ownerHandle = env.OWNER_HANDLE;
 
+  // `state` in the URL is an opaque nonce; the handle we stashed as appState
+  // is in KV under it. Peek so we can build the matching owner/visitor client
+  // (their `client_id`s differ — a mismatch makes token exchange fail).
   const stateParam = params.get("state");
-  const appState = stateParam
+  const stateHandle = stateParam
     ? (await new KvStateStore(env.OAUTH_KV).get(stateParam))?.appState
     : undefined;
-  const { handle: stateHandle } = parseState(appState);
   const isOwner = stateHandle === ownerHandle;
   const client = await createOAuthClient(origin, env, isOwner);
 
@@ -50,14 +52,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         err.params.get("error") ?? "",
       )
     ) {
-      const { handle } = parseState(err.state);
+      const handle = err.state;
       if (handle) {
         try {
           const scope =
             handle === ownerHandle ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
           const authorizeUrl = await client.authorize(handle, {
             scope,
-            state: JSON.stringify({ handle }),
+            state: handle,
           });
           throw redirect(authorizeUrl.toString());
         } catch (reauthErr) {
@@ -72,14 +74,5 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     }
 
     throw redirect("/?error=login_failed");
-  }
-}
-
-function parseState(state: string | null | undefined): { handle?: string } {
-  if (!state) return {};
-  try {
-    return JSON.parse(state);
-  } catch {
-    return {};
   }
 }
