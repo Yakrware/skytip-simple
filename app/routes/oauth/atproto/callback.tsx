@@ -1,5 +1,6 @@
 import { redirect } from "react-router";
 import { OAuthCallbackError } from "@atproto/oauth-client";
+import { KvStateStore } from "@atiproto/kv-oauth-state-store";
 import type { Route } from "./+types/callback";
 import { cloudflareContext } from "~/middleware/cloudflare";
 import {
@@ -17,7 +18,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const { env } = context.get(cloudflareContext);
   const origin = url.origin;
   const ownerHandle = env.OWNER_HANDLE;
-  const { handle: stateHandle } = parseState(params.get("state"));
+
+  // `state` in the URL is an opaque nonce; the handle we stashed as appState
+  // is in KV under it. Peek so we can build the matching owner/visitor client
+  // (their `client_id`s differ — a mismatch makes token exchange fail).
+  const stateParam = params.get("state");
+  const stateHandle = stateParam
+    ? (await new KvStateStore(env.OAUTH_KV).get(stateParam))?.appState
+    : undefined;
   const isOwner = stateHandle === ownerHandle;
   const client = await createOAuthClient(origin, env, isOwner);
 
@@ -44,27 +52,27 @@ export async function loader({ request, context }: Route.LoaderArgs) {
         err.params.get("error") ?? "",
       )
     ) {
-      const { handle } = parseState(err.state);
+      const handle = err.state;
       if (handle) {
-        const scope =
-          handle === ownerHandle ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
-        const authorizeUrl = await client.authorize(handle, {
-          scope,
-          state: JSON.stringify({ handle }),
-        });
-        throw redirect(authorizeUrl.toString());
+        try {
+          const scope =
+            handle === ownerHandle ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
+          const authorizeUrl = await client.authorize(handle, {
+            scope,
+            state: handle,
+          });
+          throw redirect(authorizeUrl.toString());
+        } catch (reauthErr) {
+          if (reauthErr instanceof Response) throw reauthErr;
+          console.error("OAuth re-authorize failed", reauthErr);
+        }
+      } else {
+        console.error("OAuth login_required without a handle in appState", err);
       }
+    } else {
+      console.error("OAuth callback failed", err);
     }
 
     throw redirect("/?error=login_failed");
-  }
-}
-
-function parseState(state: string | null | undefined): { handle?: string } {
-  if (!state) return {};
-  try {
-    return JSON.parse(state);
-  } catch {
-    return {};
   }
 }

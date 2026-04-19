@@ -1,7 +1,7 @@
 import type { Route } from "./+types/client-metadata";
 import { cloudflareContext } from "~/middleware/cloudflare";
 import { buildClientMetadata } from "~/lib/oauth/client";
-import { getKeyset } from "~/lib/oauth/keyset.server";
+import { getKeyset } from "@atiproto/edge-oauth-client";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { env } = context.get(cloudflareContext);

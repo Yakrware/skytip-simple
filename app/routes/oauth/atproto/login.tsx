@@ -6,7 +6,7 @@ import {
   OAUTH_SCOPE_OWNER,
   OAUTH_SCOPE_VISITOR,
 } from "~/lib/oauth/client";
-import { getKeyset } from "~/lib/oauth/keyset.server";
+import { getKeyset } from "@atiproto/edge-oauth-client";
 import { resolveOwner, fetchOwnerBskyProfile } from "~/lib/owner.server";
 import { Avatar } from "~/components/Avatar";
 import { ErrorBanner } from "~/components/ErrorBanner";
@@ -55,7 +55,6 @@ export async function action({ request, context }: Route.ActionArgs) {
       const authorizeUrl = await client.authorize("", {
         scope: OAUTH_SCOPE_VISITOR,
         prompt: "create",
-        state: JSON.stringify({}),
       });
       throw redirect(authorizeUrl.toString());
     } catch (e) {
@@ -82,7 +81,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     const authorizeUrl = await client.authorize(handle, {
       scope,
       ...(!!keyset && { prompt: "none" as const }),
-      state: JSON.stringify({ handle }),
+      state: handle,
     });
 
     throw redirect(authorizeUrl.toString());

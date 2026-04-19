@@ -2,6 +2,7 @@ import {
   patchGlobalRequestObject,
   EdgeOAuthClient,
   type EdgeOAuthClientOptions,
+  getKeyset,
 } from "@atiproto/edge-oauth-client";
 import { KvStateStore, KvSessionStore } from "@atiproto/kv-oauth-state-store";
 import {
@@ -9,7 +10,6 @@ import {
   createHandleCache,
 } from "@atiproto/edge-resolver-cache";
 import type { Keyset } from "@atproto/jwk";
-import { getKeyset } from "./keyset.server";
 
 patchGlobalRequestObject();
 
