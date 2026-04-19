@@ -4,6 +4,7 @@ import { cloudflareContext } from "./cloudflare";
 
 export interface AuthInfo {
   did: string;
+  handle?: string;
 }
 
 export const authContext = createContext<AuthInfo>();
@@ -20,5 +21,5 @@ export async function requireAuth({
   if (!session) {
     throw redirect("/oauth/atproto/login");
   }
-  context.set(authContext, { did: session.did });
+  context.set(authContext, { did: session.did, handle: session.handle });
 }

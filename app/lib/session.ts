@@ -14,8 +14,18 @@ export function parseCookie(header: string): Record<string, string> {
   );
 }
 
-export function sessionCookieHeader(did: string): string {
-  return `${COOKIE_NAME}=${encodeURIComponent(did)}; HttpOnly; SameSite=Lax; Secure; Max-Age=${MAX_AGE}; Path=/`;
+export function parseSessionValue(
+  raw: string | undefined,
+): { did: string; handle?: string } | null {
+  if (!raw) return null;
+  const [did, handle] = raw.split("|");
+  if (!did) return null;
+  return { did, handle: handle || undefined };
+}
+
+export function sessionCookieHeader(did: string, handle: string): string {
+  const value = `${did}|${handle}`;
+  return `${COOKIE_NAME}=${encodeURIComponent(value)}; HttpOnly; SameSite=Lax; Secure; Max-Age=${MAX_AGE}; Path=/`;
 }
 
 export function clearSessionCookieHeader(): string {

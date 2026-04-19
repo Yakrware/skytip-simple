@@ -4,6 +4,9 @@ import { buildClientMetadata } from "~/lib/oauth/client";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { env } = context.get(cloudflareContext);
-  const origin = new URL(request.url).origin;
-  return Response.json(buildClientMetadata(origin, env.OWNER_HANDLE));
+  const url = new URL(request.url);
+  const isOwner = url.searchParams.get("owner") === "true";
+  return Response.json(
+    buildClientMetadata(url.origin, env.OWNER_HANDLE, isOwner),
+  );
 }

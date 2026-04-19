@@ -46,10 +46,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   const { env } = context.get(cloudflareContext);
   const origin = new URL(request.url).origin;
-  const client = createOAuthClient(origin, env.OAUTH_KV, env.OWNER_HANDLE);
 
   // "Create account" flow — no handle needed, user registers at their PDS
   if (intent === "create") {
+    const client = createOAuthClient(
+      origin,
+      env.OAUTH_KV,
+      env.OWNER_HANDLE,
+      false,
+    );
     try {
       const authorizeUrl = await client.authorize("", {
         scope: OAUTH_SCOPE_VISITOR,
@@ -70,8 +75,14 @@ export async function action({ request, context }: Route.ActionArgs) {
     return data({ error: "Please enter your handle." }, { status: 400 });
   }
 
-  const scope =
-    handle === env.OWNER_HANDLE ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
+  const isOwner = handle === env.OWNER_HANDLE;
+  const scope = isOwner ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
+  const client = createOAuthClient(
+    origin,
+    env.OAUTH_KV,
+    env.OWNER_HANDLE,
+    isOwner,
+  );
 
   try {
     const authorizeUrl = await client.authorize(handle, {
