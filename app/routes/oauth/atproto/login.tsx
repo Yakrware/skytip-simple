@@ -6,6 +6,7 @@ import {
   OAUTH_SCOPE_OWNER,
   OAUTH_SCOPE_VISITOR,
 } from "~/lib/oauth/client";
+import { getKeyset } from "~/lib/oauth/keyset.server";
 import { resolveOwner, fetchOwnerBskyProfile } from "~/lib/owner.server";
 import { Avatar } from "~/components/Avatar";
 import { ErrorBanner } from "~/components/ErrorBanner";
@@ -49,12 +50,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   // "Create account" flow — no handle needed, user registers at their PDS
   if (intent === "create") {
-    const client = createOAuthClient(
-      origin,
-      env.OAUTH_KV,
-      env.OWNER_HANDLE,
-      false,
-    );
+    const client = await createOAuthClient(origin, env, false);
     try {
       const authorizeUrl = await client.authorize("", {
         scope: OAUTH_SCOPE_VISITOR,
@@ -77,17 +73,15 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   const isOwner = handle === env.OWNER_HANDLE;
   const scope = isOwner ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
-  const client = createOAuthClient(
-    origin,
-    env.OAUTH_KV,
-    env.OWNER_HANDLE,
-    isOwner,
-  );
+  const client = await createOAuthClient(origin, env, isOwner);
+
+  // Silent sign-on (prompt=none) is only accepted for confidential clients.
+  const keyset = await getKeyset(env.OAUTH_PRIVATE_JWK);
 
   try {
     const authorizeUrl = await client.authorize(handle, {
       scope,
-      prompt: "none",
+      ...(!!keyset && { prompt: "none" as const }),
       state: JSON.stringify({ handle }),
     });
 

@@ -19,12 +19,7 @@ export async function requireAgent({
   const origin = new URL(request.url).origin;
   try {
     const isOwner = auth.handle === env.OWNER_HANDLE;
-    const oauthClient = createOAuthClient(
-      origin,
-      env.OAUTH_KV,
-      env.OWNER_HANDLE,
-      isOwner,
-    );
+    const oauthClient = await createOAuthClient(origin, env, isOwner);
     const oauthSession = await oauthClient.restore(auth.did);
     context.set(agentContext, new Agent(oauthSession));
   } catch {

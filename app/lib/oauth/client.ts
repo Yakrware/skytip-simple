@@ -8,6 +8,8 @@ import {
   createDidCache,
   createHandleCache,
 } from "@atiproto/edge-resolver-cache";
+import type { Keyset } from "@atproto/jwk";
+import { getKeyset } from "./keyset.server";
 
 patchGlobalRequestObject();
 
@@ -18,35 +20,49 @@ export function buildClientMetadata(
   origin: string,
   ownerHandle: string,
   isOwner: boolean,
+  keyset: Keyset | null,
 ) {
-  return {
+  const base = {
     client_id: `${origin}/oauth/atproto/client-metadata.json${isOwner ? "?owner=true" : ""}`,
     client_name: `@${ownerHandle}'s skytip`,
     redirect_uris: [`${origin}/oauth/atproto/callback`],
     grant_types: ["authorization_code", "refresh_token"],
     response_types: ["code"],
     scope: isOwner ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR,
-    token_endpoint_auth_method: "none",
     dpop_bound_access_tokens: true,
     application_type: "web",
   };
+  if (keyset) {
+    return {
+      ...base,
+      token_endpoint_auth_method: "private_key_jwt",
+      token_endpoint_auth_signing_alg: "ES256",
+      jwks: keyset.publicJwks,
+    };
+  }
+  return {
+    ...base,
+    token_endpoint_auth_method: "none",
+  };
 }
 
-export function createOAuthClient(
+export async function createOAuthClient(
   origin: string,
-  kv: KVNamespace,
-  ownerHandle: string,
+  env: Env,
   isOwner: boolean,
-): EdgeOAuthClient {
+): Promise<EdgeOAuthClient> {
+  const keyset = await getKeyset(env.OAUTH_PRIVATE_JWK);
   return new EdgeOAuthClient({
     clientMetadata: buildClientMetadata(
       origin,
-      ownerHandle,
+      env.OWNER_HANDLE,
       isOwner,
+      keyset,
     ) as EdgeOAuthClientOptions["clientMetadata"],
-    stateStore: new KvStateStore(kv),
-    sessionStore: new KvSessionStore(kv),
+    stateStore: new KvStateStore(env.OAUTH_KV),
+    sessionStore: new KvSessionStore(env.OAUTH_KV),
     didCache: createDidCache(),
     handleCache: createHandleCache(),
+    keyset: keyset ?? undefined,
   });
 }

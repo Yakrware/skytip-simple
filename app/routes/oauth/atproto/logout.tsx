@@ -17,12 +17,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     try {
       const origin = new URL(request.url).origin;
       const isOwner = session.handle === env.OWNER_HANDLE;
-      const client = createOAuthClient(
-        origin,
-        env.OAUTH_KV,
-        env.OWNER_HANDLE,
-        isOwner,
-      );
+      const client = await createOAuthClient(origin, env, isOwner);
       await client.revoke(session.did);
     } catch {
       // Revocation failure is non-fatal — still clear the cookie

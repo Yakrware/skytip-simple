@@ -20,13 +20,18 @@ Built with [AT Protocol](https://atproto.com) and [aTIProto](https://atiproto.co
 
 ## Configuration
 
-After deploying, set this in your Cloudflare Worker dashboard:
+Click the **Deploy to Cloudflare** button above. The setup page that opens
+lets you fill in the one variable and attach the KV binding right there —
+you don't need to visit your Cloudflare dashboard separately.
 
 | Name | Type | Value |
 |------|------|-------|
 | `OWNER_HANDLE` | Variable | Your Bluesky handle, e.g. `alice.bsky.social` |
+| `OAUTH_KV` | KV namespace binding | Create one and attach it |
 
-Create a KV namespace and bind it as `OAUTH_KV`.
+`OAUTH_PRIVATE_JWK` (the key that enables OAuth silent sign-on) is generated
+and stored as a secret automatically on first deploy via `scripts/ensure-secret.mjs`.
+No operator action needed.
 
 Log in to your skytip deploy and follow the instructions to connect to stripe.
 
@@ -36,11 +41,15 @@ Log in to your skytip deploy and follow the instructions to connect to stripe.
 npm install
 ```
 
-Create a `.dev.vars` file at the repo root with your Bluesky handle:
+Create a `.dev.vars` file at the repo root:
 
 ```
 OWNER_HANDLE=alice.bsky.social
+# Optional — paste a generated JWK on a single line to enable silent sign-on
+OAUTH_PRIVATE_JWK=
 ```
+
+Generate a dev JWK with `npm run generate-jwk`.
 
 Then start the dev server:
 
