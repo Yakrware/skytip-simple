@@ -1,5 +1,6 @@
 import { redirect } from "react-router";
 import { OAuthCallbackError } from "@atproto/oauth-client";
+import { KvStateStore } from "@atiproto/kv-oauth-state-store";
 import type { Route } from "./+types/callback";
 import { cloudflareContext } from "~/middleware/cloudflare";
 import {
@@ -17,7 +18,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const { env } = context.get(cloudflareContext);
   const origin = url.origin;
   const ownerHandle = env.OWNER_HANDLE;
-  const { handle: stateHandle } = parseState(params.get("state"));
+
+  const stateParam = params.get("state");
+  const appState = stateParam
+    ? (await new KvStateStore(env.OAUTH_KV).get(stateParam))?.appState
+    : undefined;
+  const { handle: stateHandle } = parseState(appState);
   const isOwner = stateHandle === ownerHandle;
   const client = await createOAuthClient(origin, env, isOwner);
 
@@ -46,14 +52,23 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     ) {
       const { handle } = parseState(err.state);
       if (handle) {
-        const scope =
-          handle === ownerHandle ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
-        const authorizeUrl = await client.authorize(handle, {
-          scope,
-          state: JSON.stringify({ handle }),
-        });
-        throw redirect(authorizeUrl.toString());
+        try {
+          const scope =
+            handle === ownerHandle ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
+          const authorizeUrl = await client.authorize(handle, {
+            scope,
+            state: JSON.stringify({ handle }),
+          });
+          throw redirect(authorizeUrl.toString());
+        } catch (reauthErr) {
+          if (reauthErr instanceof Response) throw reauthErr;
+          console.error("OAuth re-authorize failed", reauthErr);
+        }
+      } else {
+        console.error("OAuth login_required without a handle in appState", err);
       }
+    } else {
+      console.error("OAuth callback failed", err);
     }
 
     throw redirect("/?error=login_failed");

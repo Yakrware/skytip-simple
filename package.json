@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@atiproto/agent": "^0.5.1",
-    "@atiproto/edge-oauth-client": "^0.0.1",
+    "@atiproto/edge-oauth-client": "^0.1.0",
     "@atiproto/edge-resolver-cache": "^0.0.1",
     "@atiproto/edge-resolvers": "^0.0.1",
     "@atiproto/kv-oauth-state-store": "^0.0.1",

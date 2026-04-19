@@ -6,7 +6,7 @@ import {
   OAUTH_SCOPE_OWNER,
   OAUTH_SCOPE_VISITOR,
 } from "~/lib/oauth/client";
-import { getKeyset } from "~/lib/oauth/keyset.server";
+import { getKeyset } from "@atiproto/edge-oauth-client";
 import { resolveOwner, fetchOwnerBskyProfile } from "~/lib/owner.server";
 import { Avatar } from "~/components/Avatar";
 import { ErrorBanner } from "~/components/ErrorBanner";
