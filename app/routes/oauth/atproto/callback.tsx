@@ -19,7 +19,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const ownerHandle = env.OWNER_HANDLE;
   const { handle: stateHandle } = parseState(params.get("state"));
   const isOwner = stateHandle === ownerHandle;
-  const client = createOAuthClient(origin, env.OAUTH_KV, ownerHandle, isOwner);
+  const client = await createOAuthClient(origin, env, isOwner);
 
   try {
     const { session: oauthSession } = await client.callback(params);

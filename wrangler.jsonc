@@ -1,18 +1,19 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "skytip-simple",
-	"compatibility_date": "2025-04-04",
-	"main": "./workers/app.ts",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
-	"vars": {
-		"OWNER_HANDLE": ""
-	},
-	"kv_namespaces": [
-		{
-			"binding": "OAUTH_KV",
-			"id": "placeholder"
-		}
-	]
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "skytip-simple",
+  "compatibility_date": "2025-04-04",
+  "main": "./workers/app.ts",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "OWNER_HANDLE": "",
+  },
+  "secrets": {
+    "required": ["OAUTH_PRIVATE_JWK"],
+  },
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "placeholder",
+    },
+  ],
 }
