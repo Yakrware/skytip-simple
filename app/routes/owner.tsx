@@ -11,6 +11,7 @@ import {
   dollarsToCents,
   optionalDollarsToCents,
 } from "~/lib/owner.server";
+import { clearSessionCookieHeader } from "~/lib/session";
 import { Card } from "~/components/Card";
 import { Button } from "~/components/Button";
 import { AmountInput } from "~/components/AmountInput";
@@ -19,10 +20,17 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.get(cloudflareContext).env;
   const auth = context.get(authContext);
   const agent = context.get(agentContext);
-  const ownerDid = await resolveOwner(env);
 
-  if (!auth || auth.did !== ownerDid || !agent) {
+  if (!auth || auth.handle !== env.OWNER_HANDLE || !agent) {
     throw redirect("/");
+  }
+
+  const ownerDid = await resolveOwner(env);
+  // Defense against a spoofed handle in the cookie
+  if (auth.did !== ownerDid) {
+    throw redirect("/", {
+      headers: { "Set-Cookie": clearSessionCookieHeader() },
+    });
   }
 
   const ownerPds = await resolveOwnerPds(ownerDid);
@@ -49,10 +57,18 @@ export async function action({ request, context }: Route.ActionArgs) {
   const env = context.get(cloudflareContext).env;
   const auth = context.get(authContext);
   const agent = context.get(agentContext);
-  const ownerDid = await resolveOwner(env);
 
-  if (!auth || auth.did !== ownerDid || !agent) {
+  if (!auth || auth.handle !== env.OWNER_HANDLE || !agent) {
     throw new Response("Forbidden", { status: 403 });
+  }
+
+  const ownerDid = await resolveOwner(env);
+  // Defense against a spoofed handle in the cookie
+  if (auth.did !== ownerDid) {
+    throw new Response("Forbidden", {
+      status: 403,
+      headers: { "Set-Cookie": clearSessionCookieHeader() },
+    });
   }
 
   const form = await request.formData();

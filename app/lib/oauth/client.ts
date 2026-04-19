@@ -11,18 +11,21 @@ import {
 
 patchGlobalRequestObject();
 
-export const OAUTH_SCOPE_OWNER =
-  "atproto include:com.atiproto.authEnhanced";
+export const OAUTH_SCOPE_OWNER = "atproto include:com.atiproto.authEnhanced";
 export const OAUTH_SCOPE_VISITOR = "atproto include:com.atiproto.authGeneral";
 
-export function buildClientMetadata(origin: string, ownerHandle: string) {
+export function buildClientMetadata(
+  origin: string,
+  ownerHandle: string,
+  isOwner: boolean,
+) {
   return {
-    client_id: `${origin}/oauth/atproto/client-metadata.json`,
+    client_id: `${origin}/oauth/atproto/client-metadata.json${isOwner ? "?owner=true" : ""}`,
     client_name: `@${ownerHandle}'s skytip`,
     redirect_uris: [`${origin}/oauth/atproto/callback`],
     grant_types: ["authorization_code", "refresh_token"],
     response_types: ["code"],
-    scope: OAUTH_SCOPE_VISITOR,
+    scope: isOwner ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR,
     token_endpoint_auth_method: "none",
     dpop_bound_access_tokens: true,
     application_type: "web",
@@ -33,11 +36,13 @@ export function createOAuthClient(
   origin: string,
   kv: KVNamespace,
   ownerHandle: string,
+  isOwner: boolean,
 ): EdgeOAuthClient {
   return new EdgeOAuthClient({
     clientMetadata: buildClientMetadata(
       origin,
       ownerHandle,
+      isOwner,
     ) as EdgeOAuthClientOptions["clientMetadata"],
     stateStore: new KvStateStore(kv),
     sessionStore: new KvSessionStore(kv),

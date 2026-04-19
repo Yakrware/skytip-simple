@@ -32,11 +32,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.get(cloudflareContext).env;
   const auth = context.get(authContext);
   const agent = context.get(agentContext);
+
+  // Owner → redirect to owner dashboard (skip owner DID resolution)
+  if (auth.handle === env.OWNER_HANDLE) throw redirect("/owner");
+
   const ownerDid = await resolveOwner(env);
-
-  // Owner → redirect to owner dashboard
-  if (auth.did === ownerDid) throw redirect("/owner");
-
   const ownerPds = await resolveOwnerPds(ownerDid);
 
   // Public reads
