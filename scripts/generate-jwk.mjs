@@ -10,7 +10,7 @@ export async function generateJwk() {
   );
   const jwk = await subtle.exportKey("jwk", privateKey);
   jwk.alg = "ES256";
-  jwk.use = "sig";
+  jwk.key_ops = ["sign"];
   jwk.kid = randomUUID();
   return jwk;
 }
