@@ -13,8 +13,10 @@ import type { Keyset } from "@atproto/jwk";
 
 patchGlobalRequestObject();
 
-export const OAUTH_SCOPE_OWNER = "atproto include:com.atiproto.authEnhanced";
-export const OAUTH_SCOPE_VISITOR = "atproto include:com.atiproto.authGeneral";
+export const OAUTH_SCOPE_OWNER =
+  "atproto include:com.atiproto.authEnhanced?aud=did:web:atiproto.com";
+export const OAUTH_SCOPE_VISITOR =
+  "atproto include:com.atiproto.authGeneral?aud=did:web:atiproto.com";
 
 export function buildClientMetadata(
   origin: string,
