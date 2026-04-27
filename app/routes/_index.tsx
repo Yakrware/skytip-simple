@@ -121,7 +121,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     return createTip({ form, agent, ownerDid, settings, origin });
   }
   if (intent === "subscribe") {
-    return createSubscription({ form, agent, ownerDid, settings });
+    return createSubscription({ form, agent, ownerDid, settings, origin });
   }
   if (intent === "cancel") {
     return cancelSubscription({ form, agent });
