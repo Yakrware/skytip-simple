@@ -26,6 +26,10 @@ import { Card } from "~/components/Card";
 import { ErrorBanner } from "~/components/ErrorBanner";
 import { OwnerCard } from "~/components/OwnerCard";
 import { SubscribePanel } from "~/components/SubscribePanel";
+import {
+  TipHistoryPanel,
+  type TipHistoryEntry,
+} from "~/components/TipHistoryPanel";
 import { TipPanel } from "~/components/TipPanel";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
@@ -66,6 +70,24 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     // No subscription to this creator
   }
 
+  let tipHistory: TipHistoryEntry[] = [];
+  try {
+    const { data } = await agent.com.atiproto.feed.tip.list({
+      subject: ownerDid,
+      limit: 50,
+    });
+    tipHistory = data.tips.map((tip) => ({
+      uri: tip.uri,
+      amount: tip.amount,
+      currency: tip.currency,
+      status: tip.status,
+      message: tip.message,
+      createdAt: tip.createdAt,
+    }));
+  } catch {
+    // No tip history available
+  }
+
   const url = new URL(request.url);
   return {
     ownerProfile,
@@ -73,6 +95,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     acceptsTips,
     acceptsSubscriptions,
     activeSubscription,
+    tipHistory,
     successMessage:
       url.searchParams.get("success") === "true"
         ? "Your payment is on its way!"
@@ -141,6 +164,7 @@ export default function VisitorPage() {
     acceptsTips,
     acceptsSubscriptions,
     activeSubscription,
+    tipHistory,
     successMessage,
     cancelledMessage,
     accessUntil,
@@ -150,9 +174,7 @@ export default function VisitorPage() {
   const errorMessage = urlError ?? actionData?.error;
 
   return (
-    <div className="mx-auto max-w-md space-y-4 p-4">
-      <OwnerCard profile={ownerProfile} />
-
+    <div className="mx-auto max-w-5xl space-y-4 p-4">
       {successMessage && (
         <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
           {successMessage}
@@ -174,40 +196,52 @@ export default function VisitorPage() {
 
       {errorMessage && <ErrorBanner message={errorMessage} />}
 
-      {!acceptsTips && !acceptsSubscriptions && (
-        <Card>
-          <p className="text-center text-text-muted">
-            {ownerProfile.displayName} is not currently accepting tips or
-            subscriptions.
-          </p>
-        </Card>
-      )}
-
-      {acceptsTips && (
-        <TipPanel
-          minTipAmount={settings.minTipAmount}
-          maxTipAmount={settings.maxTipAmount}
-          suggestedTipAmount={settings.suggestedTipAmount}
-          alwaysPrivate={settings.alwaysPrivate}
-          busy={busy}
-        />
-      )}
-
-      {acceptsSubscriptions &&
-        (activeSubscription ? (
-          <ActiveSubscriptionPanel
-            subscription={activeSubscription}
-            ownerDisplayName={ownerProfile.displayName}
-            busy={busy}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] lg:items-start">
+        <div className="space-y-4">
+          <OwnerCard profile={ownerProfile} />
+          <TipHistoryPanel
+            tips={tipHistory}
+            recipientHandle={ownerProfile.handle}
           />
-        ) : (
-          <SubscribePanel
-            minSubscriptionAmount={settings.minSubscriptionAmount}
-            maxSubscriptionAmount={settings.maxSubscriptionAmount}
-            alwaysPrivate={settings.alwaysPrivate}
-            busy={busy}
-          />
-        ))}
+        </div>
+
+        <div className="space-y-4">
+          {!acceptsTips && !acceptsSubscriptions && (
+            <Card>
+              <p className="text-center text-text-muted">
+                {ownerProfile.displayName} is not currently accepting tips or
+                subscriptions.
+              </p>
+            </Card>
+          )}
+
+          {acceptsTips && (
+            <TipPanel
+              minTipAmount={settings.minTipAmount}
+              maxTipAmount={settings.maxTipAmount}
+              suggestedTipAmount={settings.suggestedTipAmount}
+              alwaysPrivate={settings.alwaysPrivate}
+              busy={busy}
+            />
+          )}
+
+          {acceptsSubscriptions &&
+            (activeSubscription ? (
+              <ActiveSubscriptionPanel
+                subscription={activeSubscription}
+                ownerDisplayName={ownerProfile.displayName}
+                busy={busy}
+              />
+            ) : (
+              <SubscribePanel
+                minSubscriptionAmount={settings.minSubscriptionAmount}
+                maxSubscriptionAmount={settings.maxSubscriptionAmount}
+                alwaysPrivate={settings.alwaysPrivate}
+                busy={busy}
+              />
+            ))}
+        </div>
+      </div>
     </div>
   );
 }
