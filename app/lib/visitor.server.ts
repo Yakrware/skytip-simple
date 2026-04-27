@@ -54,11 +54,13 @@ export async function createSubscription({
   agent,
   ownerDid,
   settings,
+  origin,
 }: {
   form: FormData;
   agent: Agent;
   ownerDid: DidString;
   settings: SkytipSettings;
+  origin: string;
 }) {
   const amountCents = dollarsToCents(form.get("amount"));
   const interval = (form.get("interval") as string) || "monthly";
@@ -88,6 +90,7 @@ export async function createSubscription({
     currency: settings.currency ?? "USD",
     interval: interval as "monthly" | "yearly",
     isPrivate: form.get("isPrivate") === "true",
+    redirectUrl: (origin + "/?success=true") as UriString,
   });
   if (subData.checkoutUrl) return redirect(subData.checkoutUrl);
   return redirect("/?success=true");
