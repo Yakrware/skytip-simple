@@ -14,12 +14,12 @@
     "typecheck": "npm run cf-typegen && react-router typegen && tsc -b"
   },
   "dependencies": {
-    "@atiproto/agent": "^0.5.1",
+    "@atiproto/agent": "^0.6.1",
     "@atiproto/edge-oauth-client": "^0.1.0",
     "@atiproto/edge-resolver-cache": "^0.0.1",
     "@atiproto/edge-resolvers": "^0.0.1",
     "@atiproto/kv-oauth-state-store": "^0.0.1",
-    "@atiproto/lexicons": "^0.5.3",
+    "@atiproto/lexicons": "^0.8.0",
     "@atproto/api": "^0.19.8",
     "@atproto/jwk": "^0.6.0",
     "@atproto/jwk-jose": "^0.1.11",
