@@ -106,6 +106,6 @@ export async function cancelSubscription({
   const { data: cancelData } =
     await agent.com.atiproto.feed.subscription.cancel({ subscriptionUri });
   return redirect(
-    `/?cancelled=true&accessUntil=${encodeURIComponent(cancelData.accessUntil)}`,
+    `/?cancelled=true&accessUntil=${encodeURIComponent(cancelData.accessUntil!)}`,
   );
 }
