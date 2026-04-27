@@ -6,7 +6,6 @@ import {
   OAUTH_SCOPE_OWNER,
   OAUTH_SCOPE_VISITOR,
 } from "~/lib/oauth/client";
-import { getKeyset } from "@atiproto/edge-oauth-client";
 import { resolveOwner, fetchOwnerBskyProfile } from "~/lib/owner.server";
 import { Avatar } from "~/components/Avatar";
 import { ErrorBanner } from "~/components/ErrorBanner";
@@ -74,13 +73,10 @@ export async function action({ request, context }: Route.ActionArgs) {
   const scope = isOwner ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
   const client = await createOAuthClient(origin, env, isOwner);
 
-  // Silent sign-on (prompt=none) is only accepted for confidential clients.
-  const keyset = await getKeyset(env.OAUTH_PRIVATE_JWK);
-
   try {
+    // TODO: re-enable silent sign-on (prompt: "none") for confidential clients
     const authorizeUrl = await client.authorize(handle, {
       scope,
-      ...(!!keyset && { prompt: "none" as const }),
       state: handle,
     });
 
