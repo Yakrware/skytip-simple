@@ -55,13 +55,13 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     did: ownerDid,
   });
 
-  const acceptsTips = atiprotoProfile.data.profile.acceptsTips ?? true;
+  const acceptsTips = atiprotoProfile.data.profile.acceptsItems ?? true;
   const acceptsSubscriptions =
     atiprotoProfile.data.profile.acceptsSubscriptions ?? true;
 
   let activeSubscription = null;
   try {
-    const { data } = await agent.com.atiproto.feed.subscription.get({
+    const { data } = await agent.com.atiproto.payment.subscription.get({
       subject: ownerDid,
     });
     if (data.subscription.status === "active")
@@ -72,11 +72,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
   let tipHistory: TipHistoryEntry[] = [];
   try {
-    const { data } = await agent.com.atiproto.feed.tip.list({
+    const { data } = await agent.com.atiproto.payment.item.list({
       subject: ownerDid,
       limit: 50,
     });
-    tipHistory = data.tips.map((tip) => ({
+    tipHistory = data.items.map((tip) => ({
       uri: tip.uri,
       amount: tip.amount,
       currency: tip.currency,

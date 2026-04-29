@@ -36,7 +36,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const ownerPds = await resolveOwnerPds(ownerDid);
   const [settings, atiprotoProfile] = await Promise.all([
     loadOwnerSettings(ownerDid, ownerPds),
-    agent.com.atiproto.account.profile.get(),
+    agent.com.atiproto.recipient.profile.get(),
   ]);
 
   const url = new URL(request.url);
@@ -44,7 +44,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   connectUrl.searchParams.set("redirect_url", `${url.origin}/owner`);
   return {
     settings: applyDefaults(settings ?? {}),
-    acceptsTips: atiprotoProfile.data.profile.acceptsTips ?? true,
+    acceptsTips: atiprotoProfile.data.profile.acceptsItems ?? true,
     acceptsSubscriptions:
       atiprotoProfile.data.profile.acceptsSubscriptions ?? true,
     readyForPayment: atiprotoProfile.data.readyForPayment,
@@ -94,8 +94,8 @@ export async function action({ request, context }: Route.ActionArgs) {
         alwaysPrivate: form.get("alwaysPrivate") === "true",
       },
     }),
-    agent.com.atiproto.account.profile.put({
-      acceptsTips: form.get("acceptsTips") === "true",
+    agent.com.atiproto.recipient.profile.put({
+      acceptsItems: form.get("acceptsTips") === "true",
       acceptsSubscriptions: form.get("acceptsSubscriptions") === "true",
     }),
   ]);

@@ -5,7 +5,7 @@ import type { Main as SkytipSettings } from "~/lexicons/skytip/simple/settings";
 
 type UriString = `${string}:${string}`;
 type CancelInput = Parameters<
-  Agent["com"]["atiproto"]["feed"]["subscription"]["cancel"]
+  Agent["com"]["atiproto"]["payment"]["subscription"]["cancel"]
 >[0];
 
 export async function createTip({
@@ -37,7 +37,7 @@ export async function createTip({
     );
   }
 
-  const { data: tipData } = await agent.com.atiproto.feed.tip.create({
+  const { data: tipData } = await agent.com.atiproto.payment.item.create({
     subject: ownerDid,
     amount: amountCents,
     currency: settings.currency ?? "USD",
@@ -84,14 +84,15 @@ export async function createSubscription({
     );
   }
 
-  const { data: subData } = await agent.com.atiproto.feed.subscription.create({
-    subject: ownerDid,
-    amount: amountCents,
-    currency: settings.currency ?? "USD",
-    interval: interval as "monthly" | "yearly",
-    isPrivate: form.get("isPrivate") === "true",
-    redirectUrl: (origin + "/?success=true") as UriString,
-  });
+  const { data: subData } =
+    await agent.com.atiproto.payment.subscription.create({
+      subject: ownerDid,
+      amount: amountCents,
+      currency: settings.currency ?? "USD",
+      interval: interval as "monthly" | "yearly",
+      isPrivate: form.get("isPrivate") === "true",
+      redirectUrl: (origin + "/?success=true") as UriString,
+    });
   if (subData.checkoutUrl) return redirect(subData.checkoutUrl);
   return redirect("/?success=true");
 }
@@ -107,7 +108,7 @@ export async function cancelSubscription({
     "subscriptionUri",
   ) as CancelInput["subscriptionUri"];
   const { data: cancelData } =
-    await agent.com.atiproto.feed.subscription.cancel({ subscriptionUri });
+    await agent.com.atiproto.payment.subscription.cancel({ subscriptionUri });
   return redirect(
     `/?cancelled=true&accessUntil=${encodeURIComponent(cancelData.accessUntil!)}`,
   );
