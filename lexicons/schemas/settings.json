@@ -25,6 +25,14 @@
             "description": "Pre-selected tip in cents. Falls back to minTipAmount if absent.",
             "minimum": 100
           },
+          "tipAmountOptions": {
+            "type": "array",
+            "description": "Quick-select tip amounts in cents shown as buttons.",
+            "items": {
+              "type": "integer",
+              "minimum": 100
+            }
+          },
           "minSubscriptionAmount": {
             "type": "integer",
             "description": "Minimum monthly subscription in cents. Defaults to 100 ($1.00) if absent.",
@@ -34,6 +42,19 @@
             "type": "integer",
             "description": "Maximum monthly subscription in cents. No upper cap if absent.",
             "minimum": 100
+          },
+          "suggestedSubscriptionAmount": {
+            "type": "integer",
+            "description": "Pre-selected monthly subscription in cents. Falls back to minSubscriptionAmount if absent.",
+            "minimum": 100
+          },
+          "subscriptionAmountOptions": {
+            "type": "array",
+            "description": "Quick-select monthly subscription amounts in cents shown as buttons.",
+            "items": {
+              "type": "integer",
+              "minimum": 100
+            }
           },
           "currency": {
             "type": "string",

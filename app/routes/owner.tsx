@@ -9,12 +9,14 @@ import {
   loadOwnerSettings,
   applyDefaults,
   dollarsToCents,
+  dollarListToCents,
   optionalDollarsToCents,
 } from "~/lib/owner.server";
 import { clearSessionCookieHeader } from "~/lib/session";
 import { Card } from "~/components/Card";
 import { Button } from "~/components/Button";
 import { AmountInput } from "~/components/AmountInput";
+import { AmountListInput } from "~/components/AmountListInput";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.get(cloudflareContext).env;
@@ -84,11 +86,18 @@ export async function action({ request, context }: Route.ActionArgs) {
         suggestedTipAmount: optionalDollarsToCents(
           form.get("suggestedTipAmount"),
         ),
+        tipAmountOptions: dollarListToCents(form.getAll("tipAmountOption")),
         minSubscriptionAmount: dollarsToCents(
           form.get("minSubscriptionAmount"),
         ),
         maxSubscriptionAmount: optionalDollarsToCents(
           form.get("maxSubscriptionAmount"),
+        ),
+        suggestedSubscriptionAmount: optionalDollarsToCents(
+          form.get("suggestedSubscriptionAmount"),
+        ),
+        subscriptionAmountOptions: dollarListToCents(
+          form.getAll("subscriptionAmountOption"),
         ),
         currency: "USD",
         alwaysPrivate: form.get("alwaysPrivate") === "true",
@@ -197,8 +206,13 @@ export default function OwnerSettings({ loaderData }: Route.ComponentProps) {
             />
             <AmountInput
               name="suggestedTipAmount"
-              label="Suggested tip (optional)"
+              label="Default tip (optional)"
               defaultValue={settings.suggestedTipAmount}
+            />
+            <AmountListInput
+              name="tipAmountOption"
+              label="Quick-select tip amounts"
+              defaultValues={settings.tipAmountOptions}
             />
           </div>
 
@@ -215,6 +229,16 @@ export default function OwnerSettings({ loaderData }: Route.ComponentProps) {
               name="maxSubscriptionAmount"
               label="Maximum monthly subscription (optional)"
               defaultValue={settings.maxSubscriptionAmount}
+            />
+            <AmountInput
+              name="suggestedSubscriptionAmount"
+              label="Default monthly subscription (optional)"
+              defaultValue={settings.suggestedSubscriptionAmount}
+            />
+            <AmountListInput
+              name="subscriptionAmountOption"
+              label="Quick-select subscription amounts"
+              defaultValues={settings.subscriptionAmountOptions}
             />
           </div>
 

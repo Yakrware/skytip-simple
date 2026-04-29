@@ -1,62 +1,36 @@
 import { Form } from "react-router";
-import { centsToDollars } from "~/lib/currency";
-import { AmountInput } from "./AmountInput";
+import { AmountPicker } from "./AmountPicker";
 import { Button } from "./Button";
 import { Card } from "./Card";
+import { PrivacyCheckbox } from "./PrivacyCheckbox";
 
 export function TipPanel({
   minTipAmount,
   maxTipAmount,
   suggestedTipAmount,
+  tipAmountOptions,
   alwaysPrivate,
   busy,
 }: {
   minTipAmount?: number;
   maxTipAmount?: number;
   suggestedTipAmount?: number;
+  tipAmountOptions?: number[];
   alwaysPrivate?: boolean;
   busy: boolean;
 }) {
-  const defaultTipAmount = suggestedTipAmount ?? minTipAmount ?? 100;
-  const quickAmounts = [
-    minTipAmount ?? 100,
-    defaultTipAmount,
-    maxTipAmount
-      ? Math.min(defaultTipAmount * 2, maxTipAmount)
-      : defaultTipAmount * 2,
-  ];
-  const uniqueQuickAmounts = [...new Set(quickAmounts)];
-
   return (
     <Card title="Send a tip">
       <Form method="post" className="space-y-3">
         <input type="hidden" name="intent" value="tip" />
 
-        <AmountInput
-          name="amount"
+        <AmountPicker
           label="Amount"
           min={minTipAmount}
           max={maxTipAmount}
-          defaultValue={defaultTipAmount}
+          suggested={suggestedTipAmount}
+          options={tipAmountOptions}
         />
-
-        <div className="flex gap-2">
-          {uniqueQuickAmounts.map((cents) => (
-            <button
-              key={cents}
-              type="button"
-              className="rounded-lg border border-border px-3 py-1 text-sm text-text hover:bg-surface-subtle"
-              onClick={(e) => {
-                const input = (
-                  e.currentTarget.closest("form") as HTMLFormElement
-                ).querySelector<HTMLInputElement>('input[name="amount"]');
-                if (input) input.value = centsToDollars(cents);
-              }}
-            >
-              ${centsToDollars(cents)}
-            </button>
-          ))}
-        </div>
 
         <div>
           <label
@@ -75,25 +49,7 @@ export function TipPanel({
           />
         </div>
 
-        {alwaysPrivate ? (
-          <input type="hidden" name="isPrivate" value="true" />
-        ) : (
-          <label className="flex items-start gap-2 text-sm text-text">
-            <input
-              type="checkbox"
-              name="isPrivate"
-              value="true"
-              className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand"
-            />
-            <span>
-              Send privately
-              <span className="block text-xs text-text-muted">
-                Hide the recipient from my public record. Increases privacy,
-                reduces transferability.
-              </span>
-            </span>
-          </label>
-        )}
+        <PrivacyCheckbox alwaysPrivate={alwaysPrivate} label="Send privately" />
 
         <Button type="submit" disabled={busy} loading={busy}>
           Send tip
