@@ -1,54 +1,46 @@
 import { Form } from "react-router";
 import { centsToDollars } from "~/lib/currency";
-import { AmountInput } from "./AmountInput";
+import { AmountPicker } from "./AmountPicker";
 import { Button } from "./Button";
 import { Card } from "./Card";
+import { PrivacyCheckbox } from "./PrivacyCheckbox";
 
 export function SubscribePanel({
   minSubscriptionAmount,
   maxSubscriptionAmount,
+  suggestedSubscriptionAmount,
+  subscriptionAmountOptions,
   alwaysPrivate,
   busy,
 }: {
   minSubscriptionAmount?: number;
   maxSubscriptionAmount?: number;
+  suggestedSubscriptionAmount?: number;
+  subscriptionAmountOptions?: number[];
   alwaysPrivate?: boolean;
   busy: boolean;
 }) {
-  const defaultAmount = minSubscriptionAmount ?? 100;
+  const defaultAmount =
+    suggestedSubscriptionAmount ?? minSubscriptionAmount ?? 100;
+
   return (
     <Card title="Subscribe">
       <Form method="post" className="space-y-3">
         <input type="hidden" name="intent" value="subscribe" />
         <input type="hidden" name="interval" value="monthly" />
 
-        <AmountInput
-          name="amount"
+        <AmountPicker
           label="Monthly amount"
           min={minSubscriptionAmount}
           max={maxSubscriptionAmount}
-          defaultValue={defaultAmount}
+          suggested={suggestedSubscriptionAmount}
+          options={subscriptionAmountOptions}
         />
 
-        {alwaysPrivate ? (
-          <input type="hidden" name="isPrivate" value="true" />
-        ) : (
-          <label className="flex items-start gap-2 text-sm text-text">
-            <input
-              type="checkbox"
-              name="isPrivate"
-              value="true"
-              className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand"
-            />
-            <span>
-              Subscribe privately
-              <span className="block text-xs text-text-muted">
-                Hide the recipient from my public record. Increases privacy,
-                reduces transferability.
-              </span>
-            </span>
-          </label>
-        )}
+        <PrivacyCheckbox
+          alwaysPrivate={alwaysPrivate}
+          label="Subscribe privately"
+        />
 
         <Button type="submit" disabled={busy} loading={busy}>
           Subscribe ${centsToDollars(defaultAmount)}/mo

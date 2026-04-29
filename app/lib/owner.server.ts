@@ -84,6 +84,12 @@ export function optionalDollarsToCents(
   return Math.round(num * 100);
 }
 
+export function dollarListToCents(values: FormDataEntryValue[]): number[] {
+  return values
+    .map((v) => optionalDollarsToCents(v))
+    .filter((c): c is number => c !== undefined);
+}
+
 export function centsToDollars(cents: number): string {
   return (cents / 100).toFixed(2);
 }
