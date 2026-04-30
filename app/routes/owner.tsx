@@ -1,4 +1,10 @@
-import { redirect, Form, useNavigation } from "react-router";
+import {
+  redirect,
+  data,
+  Form,
+  useActionData,
+  useNavigation,
+} from "react-router";
 import type { Route } from "./+types/owner";
 import { cloudflareContext } from "~/middleware/cloudflare";
 import { authContext } from "~/middleware/auth";
@@ -17,6 +23,7 @@ import { Card } from "~/components/Card";
 import { Button } from "~/components/Button";
 import { AmountInput } from "~/components/AmountInput";
 import { AmountListInput } from "~/components/AmountListInput";
+import { ErrorBanner } from "~/components/ErrorBanner";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const env = context.get(cloudflareContext).env;
@@ -75,39 +82,61 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   const form = await request.formData();
 
-  await Promise.all([
-    agent.com.atproto.repo.putRecord({
-      repo: ownerDid,
-      collection: "skytip.simple.settings",
-      rkey: "self",
-      record: {
-        minTipAmount: dollarsToCents(form.get("minTipAmount")),
-        maxTipAmount: optionalDollarsToCents(form.get("maxTipAmount")),
-        suggestedTipAmount: optionalDollarsToCents(
-          form.get("suggestedTipAmount"),
-        ),
-        tipAmountOptions: dollarListToCents(form.getAll("tipAmountOption")),
-        minSubscriptionAmount: dollarsToCents(
-          form.get("minSubscriptionAmount"),
-        ),
-        maxSubscriptionAmount: optionalDollarsToCents(
-          form.get("maxSubscriptionAmount"),
-        ),
-        suggestedSubscriptionAmount: optionalDollarsToCents(
-          form.get("suggestedSubscriptionAmount"),
-        ),
-        subscriptionAmountOptions: dollarListToCents(
-          form.getAll("subscriptionAmountOption"),
-        ),
-        currency: "USD",
-        alwaysPrivate: form.get("alwaysPrivate") === "true",
-      },
-    }),
-    agent.com.atiproto.recipient.profile.put({
-      acceptsItems: form.get("acceptsTips") === "true",
-      acceptsSubscriptions: form.get("acceptsSubscriptions") === "true",
-    }),
+  const settingsPut = agent.com.atproto.repo.putRecord({
+    repo: ownerDid,
+    collection: "skytip.simple.settings",
+    rkey: "self",
+    record: {
+      minTipAmount: dollarsToCents(form.get("minTipAmount")),
+      maxTipAmount: optionalDollarsToCents(form.get("maxTipAmount")),
+      suggestedTipAmount: optionalDollarsToCents(
+        form.get("suggestedTipAmount"),
+      ),
+      tipAmountOptions: dollarListToCents(form.getAll("tipAmountOption")),
+      minSubscriptionAmount: dollarsToCents(form.get("minSubscriptionAmount")),
+      maxSubscriptionAmount: optionalDollarsToCents(
+        form.get("maxSubscriptionAmount"),
+      ),
+      suggestedSubscriptionAmount: optionalDollarsToCents(
+        form.get("suggestedSubscriptionAmount"),
+      ),
+      subscriptionAmountOptions: dollarListToCents(
+        form.getAll("subscriptionAmountOption"),
+      ),
+      currency: "USD",
+      alwaysPrivate: form.get("alwaysPrivate") === "true",
+    },
+  });
+
+  const profilePut = agent.com.atiproto.recipient.profile.put({
+    acceptsItems: form.get("acceptsTips") === "true",
+    acceptsSubscriptions: form.get("acceptsSubscriptions") === "true",
+  });
+
+  const [settingsResult, profileResult] = await Promise.allSettled([
+    settingsPut,
+    profilePut,
   ]);
+
+  if (settingsResult.status === "rejected") throw settingsResult.reason;
+
+  if (profileResult.status === "rejected") {
+    console.error(
+      "[owner action] recipient.profile.put failed",
+      profileResult.reason,
+    );
+    const message =
+      profileResult.reason instanceof Error
+        ? profileResult.reason.message
+        : "Failed to update accept-payment settings.";
+    return data({ error: message }, { status: 500 });
+  }
+
+  console.log("[owner action] recipient.profile.put ok", {
+    uri: profileResult.value.data.uri,
+    hasProfile: profileResult.value.data.hasProfile,
+    readyForPayment: profileResult.value.data.readyForPayment,
+  });
 
   return redirect("/owner?saved=true");
 }
@@ -144,6 +173,7 @@ export default function OwnerSettings({ loaderData }: Route.ComponentProps) {
     saved,
     connectUrl,
   } = loaderData;
+  const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSaving = navigation.state === "submitting";
 
@@ -175,6 +205,8 @@ export default function OwnerSettings({ loaderData }: Route.ComponentProps) {
           Settings saved.
         </div>
       )}
+
+      {actionData?.error && <ErrorBanner message={actionData.error} />}
 
       <Form method="post">
         <Card className="space-y-6">

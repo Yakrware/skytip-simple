@@ -1,4 +1,4 @@
-import type { Route } from "./+types/client-metadata";
+import type { Route } from "./+types/owner-metadata";
 import { cloudflareContext } from "~/middleware/cloudflare";
 import { buildClientMetadata } from "~/lib/oauth/client";
 import { getKeyset } from "@atiproto/edge-oauth-client";
@@ -8,6 +8,6 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const keyset = await getKeyset(env.OAUTH_PRIVATE_JWK);
   return Response.json(
-    buildClientMetadata(url.origin, env.OWNER_HANDLE, false, keyset),
+    buildClientMetadata(url.origin, env.OWNER_HANDLE, true, keyset),
   );
 }

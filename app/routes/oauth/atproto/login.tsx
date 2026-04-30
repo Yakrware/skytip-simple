@@ -70,13 +70,12 @@ export async function action({ request, context }: Route.ActionArgs) {
   }
 
   const isOwner = handle === env.OWNER_HANDLE;
-  const scope = isOwner ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR;
   const client = await createOAuthClient(origin, env, isOwner);
 
   try {
-    // TODO: re-enable silent sign-on (prompt: "none") for confidential clients
     const authorizeUrl = await client.authorize(handle, {
-      scope,
+      scope: isOwner ? OAUTH_SCOPE_OWNER : OAUTH_SCOPE_VISITOR,
+      prompt: "none",
       state: handle,
     });
 

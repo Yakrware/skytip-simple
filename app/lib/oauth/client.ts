@@ -13,10 +13,49 @@ import type { Keyset } from "@atproto/jwk";
 
 patchGlobalRequestObject();
 
-export const OAUTH_SCOPE_OWNER =
-  "atproto include:com.atiproto.authEnhanced?aud=did:web:atiproto.com";
-export const OAUTH_SCOPE_VISITOR =
-  "atproto include:com.atiproto.authGeneral?aud=did:web:atiproto.com";
+const ATIPROTO_AUD = "*";
+
+const OWNER_REPO_COLLECTIONS = [
+  "com.atiproto.profile",
+  "skytip.simple.settings",
+];
+
+const OWNER_RPC_LXMS = [
+  "com.atiproto.recipient.profile.get",
+  "com.atiproto.recipient.profile.put",
+];
+
+const VISITOR_REPO_COLLECTIONS = [
+  "com.atiproto.cart",
+  "com.atiproto.item",
+  "com.atiproto.subscription",
+];
+
+const VISITOR_RPC_LXMS = [
+  "com.atiproto.repo.profile.get",
+  "com.atiproto.payment.item.create",
+  "com.atiproto.payment.item.list",
+  "com.atiproto.payment.subscription.create",
+  "com.atiproto.payment.subscription.get",
+  "com.atiproto.payment.subscription.cancel",
+];
+
+function buildScope(collections: string[], lxms: string[]): string {
+  return [
+    "atproto",
+    ...collections.map((c) => `repo:${c}`),
+    ...lxms.map((lxm) => `rpc:${lxm}?aud=${ATIPROTO_AUD}`),
+  ].join(" ");
+}
+
+export const OAUTH_SCOPE_OWNER = buildScope(
+  OWNER_REPO_COLLECTIONS,
+  OWNER_RPC_LXMS,
+);
+export const OAUTH_SCOPE_VISITOR = buildScope(
+  VISITOR_REPO_COLLECTIONS,
+  VISITOR_RPC_LXMS,
+);
 
 export function buildClientMetadata(
   origin: string,
@@ -25,7 +64,7 @@ export function buildClientMetadata(
   keyset: Keyset | null,
 ) {
   const base = {
-    client_id: `${origin}/oauth/atproto/client-metadata.json${isOwner ? "?owner=true" : ""}`,
+    client_id: `${origin}/oauth/atproto/${isOwner ? "owner-metadata" : "client-metadata"}.json`,
     client_name: `@${ownerHandle}'s skytip`,
     redirect_uris: [`${origin}/oauth/atproto/callback`],
     grant_types: ["authorization_code", "refresh_token"],
