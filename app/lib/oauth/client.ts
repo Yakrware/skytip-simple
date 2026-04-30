@@ -13,7 +13,7 @@ import type { Keyset } from "@atproto/jwk";
 
 patchGlobalRequestObject();
 
-const ATIPROTO_AUD = "did:web:atiproto.com";
+const ATIPROTO_AUD = "*";
 
 const OWNER_REPO_COLLECTIONS = [
   "com.atiproto.profile",
@@ -64,7 +64,7 @@ export function buildClientMetadata(
   keyset: Keyset | null,
 ) {
   const base = {
-    client_id: `${origin}/oauth/atproto/client-metadata.json${isOwner ? "?owner=true" : ""}`,
+    client_id: `${origin}/oauth/atproto/${isOwner ? "owner-metadata" : "client-metadata"}.json`,
     client_name: `@${ownerHandle}'s skytip`,
     redirect_uris: [`${origin}/oauth/atproto/callback`],
     grant_types: ["authorization_code", "refresh_token"],

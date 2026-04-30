@@ -1,10 +1,19 @@
-import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
+import {
+  type RouteConfig,
+  index,
+  layout,
+  route,
+} from "@react-router/dev/routes";
 
 export default [
   // OAuth routes — outside layout (no auth/agent middleware needed)
   route(
     "oauth/atproto/client-metadata.json",
     "routes/oauth/atproto/client-metadata.tsx",
+  ),
+  route(
+    "oauth/atproto/owner-metadata.json",
+    "routes/oauth/atproto/owner-metadata.tsx",
   ),
   route("oauth/atproto/callback", "routes/oauth/atproto/callback.tsx"),
   route("oauth/atproto/login", "routes/oauth/atproto/login.tsx"),
