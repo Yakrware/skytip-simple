@@ -5,6 +5,7 @@ import {
   useNavigation,
   data,
 } from "react-router";
+import { prepChatForReceipts } from "@atiproto/agent";
 import type { Route } from "./+types/_index";
 import { cloudflareContext } from "~/middleware/cloudflare";
 import { authContext } from "~/middleware/auth";
@@ -128,7 +129,7 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
-  const env = context.get(cloudflareContext).env;
+  const { env, ctx } = context.get(cloudflareContext);
   const agent = context.get(agentContext);
   const ownerDid = await resolveOwner(env);
   const ownerPds = await resolveOwnerPds(ownerDid);
@@ -139,6 +140,13 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   const form = await request.formData();
   const intent = form.get("intent");
+
+  if (
+    (intent === "tip" || intent === "subscribe") &&
+    form.get("sendChatReceipt") === "true"
+  ) {
+    ctx.waitUntil(prepChatForReceipts(agent).catch(() => {}));
+  }
 
   if (intent === "tip") {
     return createTip({ form, agent, ownerDid, settings, origin });

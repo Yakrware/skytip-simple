@@ -2,6 +2,7 @@ import { Form } from "react-router";
 import { AmountPicker } from "./AmountPicker";
 import { Button } from "./Button";
 import { Card } from "./Card";
+import { ChatReceiptCheckbox } from "./ChatReceiptCheckbox";
 import { PrivacyCheckbox } from "./PrivacyCheckbox";
 
 export function TipPanel({
@@ -50,6 +51,7 @@ export function TipPanel({
         </div>
 
         <PrivacyCheckbox alwaysPrivate={alwaysPrivate} label="Send privately" />
+        <ChatReceiptCheckbox />
 
         <Button type="submit" disabled={busy} loading={busy}>
           Send tip
