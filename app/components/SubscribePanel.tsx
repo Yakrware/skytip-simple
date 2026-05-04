@@ -3,6 +3,7 @@ import { centsToDollars } from "~/lib/currency";
 import { AmountPicker } from "./AmountPicker";
 import { Button } from "./Button";
 import { Card } from "./Card";
+import { ChatReceiptCheckbox } from "./ChatReceiptCheckbox";
 import { PrivacyCheckbox } from "./PrivacyCheckbox";
 
 export function SubscribePanel({
@@ -41,6 +42,7 @@ export function SubscribePanel({
           alwaysPrivate={alwaysPrivate}
           label="Subscribe privately"
         />
+        <ChatReceiptCheckbox />
 
         <Button type="submit" disabled={busy} loading={busy}>
           Subscribe ${centsToDollars(defaultAmount)}/mo

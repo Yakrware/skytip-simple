@@ -14,15 +14,26 @@ import type { Keyset } from "@atproto/jwk";
 patchGlobalRequestObject();
 
 const ATIPROTO_AUD = "*";
+const BSKY_CHAT_AUD = "*";
+
+type Rpc = { lxm: string; aud: string };
+
+const CHAT_RPCS: Rpc[] = [
+  { lxm: "chat.bsky.convo.getConvoForMembers", aud: BSKY_CHAT_AUD },
+  { lxm: "chat.bsky.convo.getConvoAvailability", aud: BSKY_CHAT_AUD },
+  { lxm: "chat.bsky.convo.acceptConvo", aud: BSKY_CHAT_AUD },
+  { lxm: "chat.bsky.convo.sendMessage", aud: BSKY_CHAT_AUD },
+];
 
 const OWNER_REPO_COLLECTIONS = [
   "com.atiproto.profile",
   "skytip.simple.settings",
 ];
 
-const OWNER_RPC_LXMS = [
-  "com.atiproto.recipient.profile.get",
-  "com.atiproto.recipient.profile.put",
+const OWNER_RPCS: Rpc[] = [
+  { lxm: "com.atiproto.recipient.profile.get", aud: ATIPROTO_AUD },
+  { lxm: "com.atiproto.recipient.profile.put", aud: ATIPROTO_AUD },
+  ...CHAT_RPCS,
 ];
 
 const VISITOR_REPO_COLLECTIONS = [
@@ -31,30 +42,28 @@ const VISITOR_REPO_COLLECTIONS = [
   "com.atiproto.subscription",
 ];
 
-const VISITOR_RPC_LXMS = [
-  "com.atiproto.repo.profile.get",
-  "com.atiproto.payment.item.create",
-  "com.atiproto.payment.item.list",
-  "com.atiproto.payment.subscription.create",
-  "com.atiproto.payment.subscription.get",
-  "com.atiproto.payment.subscription.cancel",
+const VISITOR_RPCS: Rpc[] = [
+  { lxm: "com.atiproto.repo.profile.get", aud: ATIPROTO_AUD },
+  { lxm: "com.atiproto.payment.item.create", aud: ATIPROTO_AUD },
+  { lxm: "com.atiproto.payment.item.list", aud: ATIPROTO_AUD },
+  { lxm: "com.atiproto.payment.subscription.create", aud: ATIPROTO_AUD },
+  { lxm: "com.atiproto.payment.subscription.get", aud: ATIPROTO_AUD },
+  { lxm: "com.atiproto.payment.subscription.cancel", aud: ATIPROTO_AUD },
+  ...CHAT_RPCS,
 ];
 
-function buildScope(collections: string[], lxms: string[]): string {
+function buildScope(collections: string[], rpcs: Rpc[]): string {
   return [
     "atproto",
     ...collections.map((c) => `repo:${c}`),
-    ...lxms.map((lxm) => `rpc:${lxm}?aud=${ATIPROTO_AUD}`),
+    ...rpcs.map(({ lxm, aud }) => `rpc:${lxm}?aud=${encodeURIComponent(aud)}`),
   ].join(" ");
 }
 
-export const OAUTH_SCOPE_OWNER = buildScope(
-  OWNER_REPO_COLLECTIONS,
-  OWNER_RPC_LXMS,
-);
+export const OAUTH_SCOPE_OWNER = buildScope(OWNER_REPO_COLLECTIONS, OWNER_RPCS);
 export const OAUTH_SCOPE_VISITOR = buildScope(
   VISITOR_REPO_COLLECTIONS,
-  VISITOR_RPC_LXMS,
+  VISITOR_RPCS,
 );
 
 export function buildClientMetadata(
