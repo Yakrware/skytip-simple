@@ -57,6 +57,54 @@ Then start the dev server:
 npm run dev
 ```
 
+## Updating from upstream
+
+Cloudflare's **Deploy to Cloudflare** button creates your repo by cloning
+this one rather than forking it. GitHub doesn't track an upstream link for
+clones, so your copy won't show up in the fork network and won't offer the
+usual "Sync fork" button. To pull in new releases of `skytip-simple`, pick
+one of the options below.
+
+### Option 1 — Manual upstream sync (recommended for customized repos)
+
+Best if you've made local changes you want to keep. Add this repo as a git
+remote once, then merge updates as they ship:
+
+```bash
+git remote add upstream https://github.com/Yakrware/skytip-simple.git
+git fetch upstream
+git merge upstream/main
+git push origin main
+```
+
+Cloudflare will redeploy automatically once the push lands. Resolve any
+merge conflicts with your local edits as you would for any other repo.
+
+### Option 2 — Delete and recreate the Worker (easiest if you haven't customized)
+
+If your repo is unchanged from the original deploy, the fastest path is to
+delete the Worker in your Cloudflare dashboard and click **Deploy to
+Cloudflare** again. The setup wizard lets you pick your existing
+`OAUTH_KV` namespace, so your OAuth sessions survive the redeploy. Set
+`OWNER_HANDLE` to the same value as before.
+
+### Option 3 — Delete the GitHub repo and re-fork
+
+Delete your GitHub repo, fork `Yakrware/skytip-simple` through GitHub's
+fork button (which preserves the upstream link), then reconnect the new
+fork in Cloudflare. You'll need to edit `wrangler.jsonc` to set
+`OWNER_HANDLE` and to replace the `OAUTH_KV` `"id": "placeholder"` with
+the id of your existing KV namespace (find it under **Workers & Pages →
+KV** in the Cloudflare dashboard).
+
+### Option 4 — Fork first, deploy manually
+
+If you haven't deployed yet and prefer the easiest sync, skip
+the one-click button. Fork `Yakrware/skytip-simple` on GitHub, create a
+KV namespace in Cloudflare, edit `wrangler.jsonc` to set `OWNER_HANDLE`
+and the KV `id`, then deploy with `npx wrangler deploy`. Future upstream
+updates can be pulled with GitHub's built-in **Sync fork** button.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).
