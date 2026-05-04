@@ -5,7 +5,7 @@ import {
   useNavigation,
   data,
 } from "react-router";
-import { prepChatForReceipts } from "@atiproto/agent";
+import { prepChatForReceipts, ATIPROTO_BSKY_DID } from "@atiproto/agent";
 import type { Route } from "./+types/_index";
 import { cloudflareContext } from "~/middleware/cloudflare";
 import { authContext } from "~/middleware/auth";
@@ -145,7 +145,9 @@ export async function action({ request, context }: Route.ActionArgs) {
     (intent === "tip" || intent === "subscribe") &&
     form.get("sendChatReceipt") === "true"
   ) {
-    ctx.waitUntil(prepChatForReceipts(agent).catch(() => {}));
+    ctx.waitUntil(
+      prepChatForReceipts(agent, [ATIPROTO_BSKY_DID]).catch(() => {}),
+    );
   }
 
   if (intent === "tip") {

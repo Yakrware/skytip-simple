@@ -22,6 +22,7 @@ const CHAT_RPCS: Rpc[] = [
   { lxm: "chat.bsky.convo.getConvoForMembers", aud: BSKY_CHAT_AUD },
   { lxm: "chat.bsky.convo.getConvoAvailability", aud: BSKY_CHAT_AUD },
   { lxm: "chat.bsky.convo.acceptConvo", aud: BSKY_CHAT_AUD },
+  { lxm: "chat.bsky.convo.sendMessage", aud: BSKY_CHAT_AUD },
 ];
 
 const OWNER_REPO_COLLECTIONS = [
